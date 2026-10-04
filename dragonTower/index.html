@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="google-adsense-account" content="ca-pub-6873039572158249">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6873039572158249"
+     crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b0e14">
+<title>Dragon Tower</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --bg: #0b0e14;
+    --panel: #151a23;
+    --panel-dark: #10141c;
+    --border: #29313d;
+    --gold: #eab34b;
+    --gold-light: #ffd66f;
+    --green: #42c487;
+    --red: #d94c4c;
+    --text: #f4f5f7;
+    --muted: #7d8797;
+}
+
+html {
+    background: var(--bg);
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--text);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:
+        radial-gradient(circle at 50% -10%, #293342 0%, #151a22 30%, #0b0e14 65%);
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.13;
+    background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 32px 32px;
+}
+
+.game {
+    position: relative;
+    width: min(520px, calc(100% - 28px));
+    margin: 0 auto;
+    padding: 20px 0 28px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 14px;
+}
+
+.dragon {
+    font-size: 44px;
+    line-height: 1;
+    margin-bottom: 4px;
+    filter: drop-shadow(0 7px 12px rgba(0,0,0,.6));
+}
+
+h1 {
+    margin: 0;
+    font-size: 30px;
+    line-height: 1.1;
+    letter-spacing: -0.8px;
+}
+
+.subtitle {
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.hud {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.hud-card {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: linear-gradient(#171d26, #11151d);
+}
+
+.hud-label {
+    display: block;
+    color: var(--muted);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+}
+
+.hud-value {
+    display: block;
+    margin-top: 2px;
+    color: var(--gold-light);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+/* THE TOWER */
+.tower {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 7px;
+    border: 1px solid #222a35;
+    border-radius: 14px;
+    background: rgba(10,13,19,.7);
+}
+
+/* Level 9 is first, Level 1 is last. */
+.level {
+    position: relative;
+    display: grid;
+    grid-template-columns: 58px repeat(4, 1fr);
+    gap: 6px;
+    align-items: center;
+    min-height: 48px;
+    padding: 4px 6px;
+    border: 1px solid #252d39;
+    border-radius: 9px;
+    background: linear-gradient(180deg, #171d26, #121720);
+    transition: border-color .15s, opacity .15s;
+}
+
+.level.current {
+    border-color: var(--gold);
+    box-shadow:
+        0 0 0 1px rgba(234,179,75,.12),
+        0 0 16px rgba(234,179,75,.08);
+}
+
+.level.cleared {
+    border-color: rgba(66,196,135,.3);
+}
+
+.level.locked {
+    opacity: .48;
+}
+
+.level-name {
+    color: #697485;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.level.current .level-name {
+    color: var(--gold-light);
+}
+
+.tile {
+    width: 100%;
+    height: 39px;
+    padding: 0;
+    border: 1px solid #343d4a;
+    border-radius: 7px;
+    background: linear-gradient(180deg, #272f3b, #1d242e);
+    color: #778292;
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: inset 0 1px rgba(255,255,255,.035);
+    transition: transform .1s, border-color .12s, background .12s;
+}
+
+.level.current .tile:not(:disabled):hover {
+    transform: translateY(-1px);
+    border-color: #9a7434;
+    background: #303845;
+    color: #c3c9d2;
+}
+
+.tile:active {
+    transform: translateY(1px);
+}
+
+.tile:disabled {
+    cursor: default;
+}
+
+.tile.safe {
+    background: linear-gradient(#287c59, #1c6046);
+    border-color: var(--green);
+    color: #c4f6dd;
+}
+
+.tile.bad {
+    background: linear-gradient(#8d3333, #642525);
+    border-color: var(--red);
+    color: #ffd0d0;
+}
+
+.message {
+    min-height: 22px;
+    margin: 11px 0 8px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.message.win {
+    color: var(--gold-light);
+}
+
+.message.lose {
+    color: #ff7777;
+}
+
+.retry {
+    display: none;
+    width: 100%;
+    padding: 11px;
+    border: 0;
+    border-radius: 9px;
+    background: linear-gradient(#f5c75f, #d99c31);
+    color: #18130a;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.footer {
+    margin-top: 9px;
+    color: #555f6f;
+    text-align: center;
+    font-size: 10px;
+}
+
+/* Small phones */
+@media (max-width: 390px) {
+    .game {
+        width: calc(100% - 18px);
+        padding-top: 12px;
+    }
+
+    .dragon {
+        font-size: 38px;
+    }
+
+    h1 {
+        font-size: 26px;
+    }
+
+    .level {
+        grid-template-columns: 50px repeat(4, 1fr);
+        gap: 4px;
+        min-height: 43px;
+        padding: 3px 4px;
+    }
+
+    .tile {
+        height: 35px;
+        font-size: 13px;
+    }
+
+    .level-name {
+        font-size: 8px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <header class="header">
+        <div class="dragon">🐉</div>
+        <h1>Dragon Tower</h1>
+        <p class="subtitle">Climb the tower. Choose wisely.</p>
+    </header>
+
+    <div class="hud">
+        <div class="hud-card">
+            <span class="hud-label">Current Level</span>
+            <span class="hud-value" id="levelText">1 / 9</span>
+        </div>
+
+        <div class="hud-card">
+            <span class="hud-label">Run</span>
+            <span class="hud-value" id="runText">1</span>
+        </div>
+    </div>
+
+    <div class="tower" id="tower"></div>
+
+    <div class="message" id="message">
+        Two tiles are safe. Two are dangerous.
+    </div>
+
+    <button class="retry" id="retry">↻ Retry</button>
+
+    <div class="footer">
+        Every retry generates a new tower.
+    </div>
+
+</div>
+
+<script>
+let currentLevel = 0;
+let run = 1;
+let dangerTiles = [];
+
+const tower = document.getElementById("tower");
+const levelText = document.getElementById("levelText");
+const runText = document.getElementById("runText");
+const message = document.getElementById("message");
+const retry = document.getElementById("retry");
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function createRandomTower() {
+    dangerTiles = [];
+
+    for (let level = 0; level < 9; level++) {
+        dangerTiles.push(shuffle([true, true, false, false]));
+    }
+}
+
+function buildTower() {
+    tower.innerHTML = "";
+
+    /*
+        We render from Level 9 down to Level 1.
+        Level 1 is therefore physically at the bottom,
+        so the player climbs upward.
+    */
+    for (let level = 8; level >= 0; level--) {
+
+        const row = document.createElement("div");
+        row.className = "level";
+        row.id = "level-" + level;
+
+        if (level === currentLevel) {
+            row.classList.add("current");
+        } else if (level < currentLevel) {
+            row.classList.add("cleared");
+        } else {
+            row.classList.add("locked");
+        }
+
+        const name = document.createElement("div");
+        name.className = "level-name";
+        name.textContent = "Level " + (level + 1);
+        row.appendChild(name);
+
+        for (let tile = 0; tile < 4; tile++) {
+            const button = document.createElement("button");
+
+            button.className = "tile";
+            button.textContent = "◆";
+
+            /*
+                Only the current level can be clicked.
+            */
+            button.disabled = level !== currentLevel;
+
+            button.addEventListener("click", function () {
+                chooseTile(level, tile, button);
+            });
+
+            row.appendChild(button);
+        }
+
+        tower.appendChild(row);
+    }
+}
+
+function refreshTower() {
+    const rows = document.querySelectorAll(".level");
+
+    rows.forEach(function (row) {
+        const level = Number(row.id.replace("level-", ""));
+
+        row.classList.toggle("current", level === currentLevel);
+        row.classList.toggle("cleared", level < currentLevel);
+        row.classList.toggle("locked", level > currentLevel);
+
+        const buttons = row.querySelectorAll(".tile");
+
+        buttons.forEach(function (button) {
+            button.disabled = level !== currentLevel;
+        });
+    });
+
+    levelText.textContent =
+        currentLevel < 9
+            ? (currentLevel + 1) + " / 9"
+            : "TOP";
+
+    runText.textContent = run;
+}
+
+function chooseTile(level, tile, button) {
+
+    if (level !== currentLevel) {
+        return;
+    }
+
+    if (dangerTiles[level][tile]) {
+
+        button.classList.add("bad");
+        button.textContent = "✕";
+
+        message.textContent = "The dragon caught you.";
+        message.className = "message lose";
+
+        endGame();
+        return;
+    }
+
+    button.classList.add("safe");
+    button.textContent = "✓";
+    button.disabled = true;
+
+    currentLevel++;
+
+    if (currentLevel === 9) {
+
+        levelText.textContent = "TOP";
+
+        message.textContent =
+            "🏆 YOU WIN — You reached the top!";
+
+        message.className = "message win";
+
+        endGame();
+        return;
+    }
+
+    refreshTower();
+
+    message.textContent = "Safe. Keep climbing.";
+    message.className = "message";
+}
+
+function endGame() {
+
+    document.querySelectorAll(".tile").forEach(function (button) {
+        button.disabled = true;
+    });
+
+    retry.style.display = "block";
+}
+
+function startGame() {
+
+    currentLevel = 0;
+
+    createRandomTower();
+    buildTower();
+    refreshTower();
+
+    message.textContent =
+        "Two tiles are safe. Two are dangerous.";
+
+    message.className = "message";
+
+    retry.style.display = "none";
+}
+
+retry.addEventListener("click", function () {
+    run++;
+    startGame();
+});
+
+startGame();
+</script>
+
+</body>
+</html>

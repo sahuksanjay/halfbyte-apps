@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="google-adsense-account" content="ca-pub-6873039572158249">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6873039572158249"
+     crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>QR Code Generator</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f2f4f7;
+            color: #111827;
+        }
+
+        .container {
+            width: 420px;
+            max-width: 92%;
+            background: white;
+            padding: 32px;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin: 0;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-top: 8px;
+            margin-bottom: 28px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 110px;
+            padding: 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            resize: none;
+            font-size: 15px;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #111827;
+        }
+
+        .generate-btn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+
+            background: #111827;
+            color: white;
+
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .generate-btn:hover {
+            background: #000;
+        }
+
+        .qr-section {
+            display: none;
+            margin-top: 28px;
+            text-align: center;
+        }
+
+        #qrcode {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            padding: 18px;
+            width: fit-content;
+            margin: 0 auto;
+
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+        }
+
+        #qrcode img {
+            display: block;
+        }
+
+        .download-btn {
+            margin-top: 18px;
+            padding: 11px 18px;
+
+            border: 1px solid #d1d5db;
+            border-radius: 9px;
+            background: white;
+
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .download-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .error {
+            color: #dc2626;
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>QR Code Generator</h1>
+
+        <p class="subtitle">
+            Enter anything and turn it into a QR code.
+        </p>
+
+        <label for="textInput">Text or URL</label>
+
+        <textarea
+            id="textInput"
+            placeholder="https://example.com"
+        ></textarea>
+
+        <div class="error" id="errorMessage">
+            Please enter some text or a URL.
+        </div>
+
+        <button class="generate-btn" onclick="generateQR()">
+            Generate QR Code
+        </button>
+
+        <div class="qr-section" id="qrSection">
+
+            <div id="qrcode"></div>
+
+            <button class="download-btn" onclick="downloadQR()">
+                Download PNG
+            </button>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        let qrCode;
+
+        function generateQR() {
+
+            const input = document.getElementById("textInput");
+            const text = input.value.trim();
+
+            const error = document.getElementById("errorMessage");
+            const qrSection = document.getElementById("qrSection");
+            const qrContainer = document.getElementById("qrcode");
+
+            if (text === "") {
+                error.style.display = "block";
+                qrSection.style.display = "none";
+                return;
+            }
+
+            error.style.display = "none";
+
+            // Remove the previous QR code
+            qrContainer.innerHTML = "";
+
+            qrCode = new QRCode(qrContainer, {
+                text: text,
+                width: 220,
+                height: 220,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            qrSection.style.display = "block";
+        }
+
+
+        function downloadQR() {
+
+            const qrContainer = document.getElementById("qrcode");
+
+            const image = qrContainer.querySelector("img");
+
+            if (!image) {
+                return;
+            }
+
+            const link = document.createElement("a");
+
+            link.href = image.src;
+            link.download = "qr-code.png";
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+
+        // Generate when Ctrl + Enter is pressed
+        document.getElementById("textInput").addEventListener("keydown", function(event) {
+
+            if (event.ctrlKey && event.key === "Enter") {
+                generateQR();
+            }
+
+        });
+
+    </script>
+
+</body>
+</html>
